@@ -8,7 +8,7 @@
 #define RANGE		100
 #define	NUM_LEDS	  1
 
-int ledMap [NUM_LEDS] = { 0 } ;
+int ledMap [NUM_LEDS] = { 1 } ;
 
 int values [NUM_LEDS] = { 25 } ;
 
@@ -19,6 +19,7 @@ int main ()
 
   wiringPitayaSetup ()  ;
 
+  pinMode(1, 0);
   for (i = 0 ; i < NUM_LEDS ; ++i)
   {
     softPwmCreate (ledMap [i], 0, RANGE) ;

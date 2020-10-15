@@ -27,7 +27,7 @@ void digitalWrite (int pin, int value) {
  */
 
 void pinMode (int pin, int mode) {
-  printf("pinMode(%d %d)", pin, mode);
+  wp_gpio_pin_mode(pin);
 }
 
 /*

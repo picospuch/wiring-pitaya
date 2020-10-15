@@ -1,3 +1,10 @@
+# compiler
+#TOOLCHAIN_ROOT := /home/spuch/opt/gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf
+#CC := $(TOOLCHAIN_ROOT)/bin/arm-linux-gnueabihf-gcc
+INCLUDE = -I.
+CFLAGS = $(DEFS) $(INCLUDE) -pipe -fPIC $(EXTRA_CFLAGS)
+LIBS    = -lpthread
+
 STATIC = libwiringpitaya.a
 
 # code
@@ -9,12 +16,6 @@ SRC =	wiring-pitaya.c					\
 OBJ	= $(SRC:.c=.o)
 
 OUT_FILES = $(OBJ) $(STATIC) test.o test
-
-# compiler
-CC ?= gcc
-INCLUDE = -I.
-CFLAGS = $(DEFS) $(INCLUDE) -pipe -fPIC $(EXTRA_CFLAGS)
-LIBS    = -lpthread
 
 all: $(STATIC)
 

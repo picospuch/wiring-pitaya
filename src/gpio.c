@@ -15,16 +15,13 @@ linux/gpio.h can be used to handle multiple gpio lines at the same time. */
 
 #include <linux/gpio.h>
 
-struct wp_gpio wg_gpio_instance;
+struct wp_gpio wp_gpio_instance;
 
 int wp_gpio_init() {
   char chrdev_name[20];
   int fd, ret;
   
-  struct gpiohandle_request *req;
-  struct gpiohandle_data *data;
-
-  strcpy(chrdev_name, "/dev/gpiochip6");
+  strcpy(chrdev_name, "/dev/gpiochip8");
 
   /*  Open device: gpiochip6 for GPIO bank G */
   fd = open(chrdev_name, 0);
@@ -35,44 +32,47 @@ int wp_gpio_init() {
     return ret;
   }
 
-  wg_gpio_instance.fd = fd;
+  wp_gpio_instance.fd = fd;
   
-  wg_gpio_instance.req = malloc(sizeof(struct gpiohandle_request));
-  wg_gpio_instance.data = malloc(sizeof(struct gpiohandle_data));
-
-  req = wg_gpio_instance.req;
-  data = wg_gpio_instance.data;
-  
-  /* request GPIO line: GPIO_G_3 */
-  req->lineoffsets[0] = 3;
-  req->lines  = 1;
-  req->flags = GPIOHANDLE_REQUEST_OUTPUT;
-  memcpy(req->default_values, data, sizeof(req->default_values));
-  strcpy(req->consumer_label, "led_gpio_g_3");
-
-  ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, req);
-  if (ret == -1) {
-    ret = -errno;
-    fprintf(stderr, "strerror: %s\n", strerror(errno));
-    fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
-			ret);
-  }
-  if (close(fd) == -1)
-    perror("Failed to close GPIO character device file");
-
+  wp_gpio_instance.req = malloc(sizeof(struct gpiohandle_request));
+  wp_gpio_instance.data = malloc(sizeof(struct gpiohandle_data));
 }
 
 int wp_gpio_release() {
   int ret;
   /*  release line */
-  ret = close(wg_gpio_instance.fd);
+  ret = close(wp_gpio_instance.fd);
   if (ret == -1) {
     perror("Failed to close GPIO LINEHANDLE device file");
     ret = -errno;
   }
   return 0;
 }
-int wp_gpio_pin_mode() {
+
+int wp_gpio_pin_mode(int pin) {
+  int ret;
+  
+  struct gpiohandle_request *req;
+  struct gpiohandle_data *data;
+
+  req = wp_gpio_instance.req;
+  data = wp_gpio_instance.data;
+  
+  /* request GPIO line: GPIO_G_3 */
+  req->lineoffsets[0] = pin;
+  req->lines  = 1;
+  req->flags = GPIOHANDLE_REQUEST_OUTPUT;
+  memcpy(req->default_values, data, sizeof(req->default_values));
+  strcpy(req->consumer_label, "wiringpi-pitaya");
+
+  ret = ioctl(wp_gpio_instance.fd, GPIO_GET_LINEHANDLE_IOCTL, req);
+  if (ret == -1) {
+    ret = -errno;
+    fprintf(stderr, "strerror: %s\n", strerror(errno));
+    fprintf(stderr, "Failed to issue GET LINEHANDLE IOCTL (%d)\n",
+			ret);
+  }
+
   return 0;
 }
 
@@ -84,9 +84,10 @@ void wp_gpio_write (int pin, int value) {
 
   value = value ? 1 : 0;
   
-  req = wg_gpio_instance.req;
-  data = wg_gpio_instance.data;
-  
+  req = wp_gpio_instance.req;
+  data = wp_gpio_instance.data;
+
+  req->lineoffsets[0] = pin;
   data->values[0] = value;
   ret = ioctl(req->fd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, data);
   if (ret == -1) {
