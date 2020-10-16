@@ -17,7 +17,7 @@ int wiringPitayaSetup (void) {
  */
 
 void digitalWrite (int pin, int value) {
-  wp_gpio_write(0, value);
+  wp_gpio_write(pin, value);
 }
 
 /*

@@ -3,10 +3,13 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+#include <linux/gpio.h>
+
 struct wp_gpio {
   struct gpiohandle_request *req;
   struct gpiohandle_data *data;
-  int fd;
+  int chip_fd;
+  int line_fd[GPIOHANDLES_MAX];
 };
 
 struct wp_gpio_pin {
